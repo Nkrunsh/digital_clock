@@ -1,34 +1,11 @@
-#include <Adafruit_NeoPixel.h>
-#include <DS3231.h>
+#include <Adafruit_NeoPixel.h>  // v1.11.0 Adafruit
+#include <DS3231.h>             //v1.1.2 Andrew Wickert
 #include <Wire.h>
 #include <string.h>
 #include <EEPROM.h>
+#include "constants.h"
 
-#define CLINT 2       //Interrup PIN
-#define HOUR_PIN 3    // Hour data LEDS
-#define MINUTE_PIN 6  // Minute data LEDS
-
-#define NUMPIXELS 15  // Number of LEDs per side
-
-#define alarmBits 0b00001110  // Alarm settings per minute
-#define H12MODE false         // 24h settings
-#define alarmDayIsDay false   // Alarm settings
-#define alarmPM false         // PM Alarm settings
 int addr = 0;
-
-// Digital sequences for 7-segment display
-#define ZERO "1110111"
-#define ONE "0010001"
-#define TWO "1101011"
-#define THREE "0111011"
-#define FOUR "0011101"
-#define FIVE "0111110"
-#define SIX "1111110"
-#define SEVEN "0010011"
-#define EIGTH "1111111"
-#define NINE "0111111"
-#define NONE "0000000"
-
 
 byte lightBrightness = 75;  // Brightness intensity
 uint32_t lightColor = 0x009696;
@@ -39,6 +16,7 @@ DateTime now;
 
 Adafruit_NeoPixel hour_pixels(NUMPIXELS, HOUR_PIN, NEO_GRB + NEO_KHZ800);
 Adafruit_NeoPixel minute_pixels(NUMPIXELS, MINUTE_PIN, NEO_GRB + NEO_KHZ800);
+
 
 volatile byte tick = 1;  // Interruption handling variable
 
@@ -88,9 +66,9 @@ void setup() {
   pinMode(CLINT, INPUT_PULLUP);
   attachInterrupt(digitalPinToInterrupt(CLINT), isr_clockUpdate, FALLING);
 
-  //Serial.begin(9600);  // DEBUG LINE
+  Serial.begin(BAUD_RATE);  // DEBUG LINE
   minute_pixels.clear();
-updateClockDot();
+  updateClockDot();
 }
 
 void loop() {
@@ -175,7 +153,7 @@ String getNumberSequence(byte number) {
 void setHourDigit(String num) {
   for (int i = 13; i >= 0; i--) {
     if (num[13 - i] == '0') {
-      hour_pixels.setPixelColor(i + 1, 0x000000);
+      hour_pixels.setPixelColor(i + 1, OFF_LIGHT);
     } else {
       hour_pixels.setPixelColor(i + 1, lightColor);
     }
@@ -190,7 +168,7 @@ void setMinuteDigit(String num) {
   for (int i = 0; i < 14; i++) {
     Serial.println(num[i]);
     if (num[i] == '0') {
-      minute_pixels.setPixelColor(i + 1, 0x000000);
+      minute_pixels.setPixelColor(i + 1, OFF_LIGHT);
     } else {
       minute_pixels.setPixelColor(i + 1, lightColor);
     }
@@ -202,7 +180,7 @@ void showLed() {
   minute_pixels.show();
 }
 
-void updateClockDot(){
+void updateClockDot() {
   hour_pixels.setPixelColor(0, lightColor);
   minute_pixels.setPixelColor(0, lightColor);
   showLed();
@@ -217,3 +195,36 @@ void setClocksetBrightness(uint8_t Brightness) {
   minute_pixels.setBrightness(Brightness);
   showLed();
 }
+
+void getBTCommand() {
+  if (Serial.available() > 0) {
+    char commandChar = (char)Serial.read();
+    
+    if(commandChar == COLOR_COMMAND){
+
+
+
+    }else if(commandChar == TCOLOR_COMMAND){
+      
+
+    }else if(commandChar == BRIGHTNESS_COMMAND){
+      byte brightness_value = Serial.read();
+      setBrightness(brightness_value);
+      
+    }else if(commandChar == SYN_HOURE_COMMAND){
+      
+      
+    }
+
+  }
+}
+
+
+
+
+
+
+
+
+
+
